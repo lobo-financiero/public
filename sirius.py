@@ -202,36 +202,40 @@ if spy_prices is not None and not spy_prices.empty:
 # Create the plot
 fig_line = go.Figure()
 
-# --- Define the new color and style scheme ---
+# --- Define the new, robust color and style scheme ---
 color_map = {
     'A': 'royalblue',
     'B': 'mediumseagreen',
-    'C': 'crimson', # A standout color for the new model
+    'C': 'crimson',
     'SPY': 'orange'
 }
 
+# Restructured to be explicit and avoid conflicts
 style_map = {
-    'full': {'dash': 'solid', 'width': 3},
-    'top10': {'dash': 'dash', 'width': 2},
-    'benchmark': {'dash': 'dot', 'width': 3}
+    'full_report':   {'dash': 'solid', 'width': 3},
+    'full_live':     {'dash': 'dashdot', 'width': 3},
+    'top10_report':  {'dash': 'dash', 'width': 2},
+    'top10_live':    {'dash': 'longdash', 'width': 2},
+    'benchmark':     {'dash': 'dot', 'width': 3}
 }
 
-# --- Add Traces using the new scheme ---
+
+# --- Add Traces using the new, clean scheme ---
 
 # Model C (New Backtested)
-if not gain_c_report.empty: fig_line.add_trace(go.Scatter(x=gain_c_report.index, y=gain_c_report, mode='lines', name='Model C (Report)', line=dict(color=color_map['C'], **style_map['full'])))
-if not gain_c_live.empty: fig_line.add_trace(go.Scatter(x=gain_c_live.index, y=gain_c_live, mode='lines', name='Model C (Live)', line=dict(color=color_map['C'], **style_map['full'], dash='dashdot'))) # Slightly different dash for live
-if not gain_c_report_top10.empty: fig_line.add_trace(go.Scatter(x=gain_c_report_top10.index, y=gain_c_report_top10, mode='lines', name=f'Model C (Top {PORTFOLIO_SIZE_TOP_N})', line=dict(color=color_map['C'], **style_map['top10'])))
+if not gain_c_report.empty: fig_line.add_trace(go.Scatter(x=gain_c_report.index, y=gain_c_report, mode='lines', name='Model C (Report)', line=dict(color=color_map['C'], **style_map['full_report'])))
+if not gain_c_live.empty: fig_line.add_trace(go.Scatter(x=gain_c_live.index, y=gain_c_live, mode='lines', name='Model C (Live)', line=dict(color=color_map['C'], **style_map['full_live'])))
+if not gain_c_report_top10.empty: fig_line.add_trace(go.Scatter(x=gain_c_report_top10.index, y=gain_c_report_top10, mode='lines', name=f'Model C (Top {PORTFOLIO_SIZE_TOP_N})', line=dict(color=color_map['C'], **style_map['top10_report'])))
 
 # Model B (Original)
-if not gain_b_report.empty: fig_line.add_trace(go.Scatter(x=gain_b_report.index, y=gain_b_report, mode='lines', name='Model B (Report)', line=dict(color=color_map['B'], **style_map['full'])))
-if not gain_b_live.empty: fig_line.add_trace(go.Scatter(x=gain_b_live.index, y=gain_b_live, mode='lines', name='Model B (Live)', line=dict(color=color_map['B'], **style_map['full'], dash='dashdot')))
-if not gain_b_report_top10.empty: fig_line.add_trace(go.Scatter(x=gain_b_report_top10.index, y=gain_b_report_top10, mode='lines', name=f'Model B (Top {PORTFOLIO_SIZE_TOP_N})', line=dict(color=color_map['B'], **style_map['top10'])))
+if not gain_b_report.empty: fig_line.add_trace(go.Scatter(x=gain_b_report.index, y=gain_b_report, mode='lines', name='Model B (Report)', line=dict(color=color_map['B'], **style_map['full_report'])))
+if not gain_b_live.empty: fig_line.add_trace(go.Scatter(x=gain_b_live.index, y=gain_b_live, mode='lines', name='Model B (Live)', line=dict(color=color_map['B'], **style_map['full_live'])))
+if not gain_b_report_top10.empty: fig_line.add_trace(go.Scatter(x=gain_b_report_top10.index, y=gain_b_report_top10, mode='lines', name=f'Model B (Top {PORTFOLIO_SIZE_TOP_N})', line=dict(color=color_map['B'], **style_map['top10_report'])))
 
 # Model A (Original)
-if not gain_a_report.empty: fig_line.add_trace(go.Scatter(x=gain_a_report.index, y=gain_a_report, mode='lines', name='Model A (Report)', line=dict(color=color_map['A'], **style_map['full'])))
-if not gain_a_live.empty: fig_line.add_trace(go.Scatter(x=gain_a_live.index, y=gain_a_live, mode='lines', name='Model A (Live)', line=dict(color=color_map['A'], **style_map['full'], dash='dashdot')))
-if not gain_a_report_top10.empty: fig_line.add_trace(go.Scatter(x=gain_a_report_top10.index, y=gain_a_report_top10, mode='lines', name=f'Model A (Top {PORTFOLIO_SIZE_TOP_N})', line=dict(color=color_map['A'], **style_map['top10'])))
+if not gain_a_report.empty: fig_line.add_trace(go.Scatter(x=gain_a_report.index, y=gain_a_report, mode='lines', name='Model A (Report)', line=dict(color=color_map['A'], **style_map['full_report'])))
+if not gain_a_live.empty: fig_line.add_trace(go.Scatter(x=gain_a_live.index, y=gain_a_live, mode='lines', name='Model A (Live)', line=dict(color=color_map['A'], **style_map['full_live'])))
+if not gain_a_report_top10.empty: fig_line.add_trace(go.Scatter(x=gain_a_report_top10.index, y=gain_a_report_top10, mode='lines', name=f'Model A (Top {PORTFOLIO_SIZE_TOP_N})', line=dict(color=color_map['A'], **style_map['top10_report'])))
 
 # Benchmark
 if not gain_spy.empty: fig_line.add_trace(go.Scatter(x=gain_spy.index, y=gain_spy, mode='lines', name='SPY (Benchmark)', line=dict(color=color_map['SPY'], **style_map['benchmark'])))
@@ -247,7 +251,6 @@ fig_line.update_layout(
 )
 
 st.plotly_chart(fig_line, use_container_width=True)
-
 # === 3. UNIFIED STOCK MEMBERSHIP TABLE ===
 st.header("📋 Master Stock List")
 all_portfolio_tickers = sorted(list(set(
