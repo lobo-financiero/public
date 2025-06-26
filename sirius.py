@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 from pandas.tseries.offsets import BDay
 
 # === CONFIGURATION ===
-purchase_date = "2024-01-01" # Using a more recent date for demo purposes
+purchase_date = "2025-06-18"
 benchmark = "SPY"
 investment_per_stock = 100
 PORTFOLIO_SIZE_TOP_N = 10 # Define how many "top" stocks to show
