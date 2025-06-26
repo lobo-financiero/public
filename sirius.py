@@ -9,6 +9,11 @@ from pandas.tseries.offsets import BDay
 
 # === CONFIGURATION ===
 purchase_date = "2025-06-18"
+# Get purchase date, adjusted for business days
+if BDay().is_on_offset(purchase_date):
+    purchase_date = purchase_date.strftime("%Y-%m-%d")
+else:
+    purchase_date = (purchase_date - BDay(1)).strftime("%Y-%m-%d")
 benchmark = "SPY"
 investment_per_stock = 100
 PORTFOLIO_SIZE_TOP_N = 10 # Define how many "top" stocks to show
