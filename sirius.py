@@ -61,19 +61,19 @@ tickers_model_b_live = [
 
 # --- Model C (The New, Backtested & Corrected Model) ---
 # TODO: Replace these placeholder tickers with your actual new model outputs.
-tickers_model_c_report = [
-   'ENPH', 'SMCI', 'NVDA', 'NCLH', 'EQT', 'PLTR', 'FSLR', 'DECK', 'GM', 'MRNA',
-   'TKO', 'LVS', 'FTI', 'FICO', 'FTNT', 'LRCX', 'AXON', 'ORLY', 'BX', 'PWR',
-   'JBL', 'IT', 'STX', 'ANET', 'PANW', 'ABNB', 'AMZN', 'STLD', 'TSLA', 'HPQ',
-   'MCK', 'COIN', 'MPWR', 'LYV', 'AVGO', 'AMAT', 'DELL', 'CRWD', 'VTRS', 'AAPL',
-   'DASH', 'MCHP', 'EXPE', 'COR', 'CAH', 'CF', 'REGN', 'KLAC', 'PARA', 'F'
+tickers_model_c_report = tickers = [
+    "CPB", "ENPH", "MRNA", "CZR", "DE", "NCLH", "TSLA", "MCHP", "PEG", "GDDY",
+    "GNRC", "MGM", "MOS", "KKR", "WBD", "WBA", "AMCR", "EW", "SYK", "MU",
+    "KLAC", "NVDA", "VTRS", "PLTR", "DLTR", "SNPS", "AAPL", "INTC", "COIN", "LEN",
+    "PYPL", "PARA", "CF", "DPZ", "ARE", "NUE", "ADBE", "ORLY", "EA", "VRSN",
+    "AMAT", "MTCH", "ADSK", "ADI", "NTAP", "WYNN", "MHK", "AVGO", "F", "SWKS"
 ]
 tickers_model_c_live = [
-   'ENPH', 'SMCI', 'NVDA', 'NCLH', 'EQT', 'FSLR', 'DECK', 'MRNA', 'GM', 'PLTR',
-   'TKO', 'LVS', 'FICO', 'FTNT', 'LRCX', 'ORLY', 'PWR', 'BX', 'JBL', 'AXON',
-   'IT', 'STX', 'PANW', 'ANET', 'PARA', 'ABNB', 'AMZN', 'HPQ', 'STLD', 'TSLA',
-   'MCK', 'APA', 'MPWR', 'LYV', 'COIN', 'AVGO', 'AMAT', 'DELL', 'VTRS', 'CRWD',
-   'DASH', 'AAPL', 'CZR', 'MCHP', 'EXPE', 'COR', 'F', 'CAH', 'CF', 'REGN'
+    "ENPH", "CPB", "MRNA", "CZR", "DE", "NCLH", "GDDY", "PEG", "LULU", "MCHP",
+    "TSLA", "SYK", "AMCR", "MGM", "GNRC", "KKR", "AAPL", "DPZ", "EW", "VTRS",
+    "ADBE", "ARE", "WBA", "LEN", "SNPS", "MHK", "MOS", "ORLY", "PYPL", "PARA",
+    "NVDA", "INTC", "STLD", "WBD", "ADSK", "DLTR", "IPG", "NTAP", "EA", "AVGO",
+    "HUM", "DVA", "FICO", "LOW", "F", "HPQ", "EPAM", "ELV", "WYNN", "KMX"
 ]
 
 
