@@ -1,3 +1,5 @@
+#@title Sirius Portfolio Tracker (Dashboard Code with 3 Models)
+
 import streamlit as st
 import pandas as pd
 import requests
@@ -6,10 +8,10 @@ import plotly.graph_objects as go
 from pandas.tseries.offsets import BDay
 
 # === CONFIGURATION ===
-purchase_date = "2025-06-17"
+purchase_date = "2024-01-01" # Using a more recent date for demo purposes
 benchmark = "SPY"
 investment_per_stock = 100
-PORTFOLIO_SIZE_TOP_N = 10 # Define how many "top" stocks to show in bar charts
+PORTFOLIO_SIZE_TOP_N = 10 # Define how many "top" stocks to show
 
 # Get current date, adjusted for business days
 current_date = datetime.today()
@@ -18,9 +20,9 @@ if BDay().is_on_offset(current_date):
 else:
     today = (current_date - BDay(1)).strftime("%Y-%m-%d")
 
-# === TICKER GROUPS FOR FOUR PORTFOLIOS ===
-# TODO: Replace these placeholder tickers with your actual model outputs.
-# These represent the top N stocks predicted using the price on the REPORT DATE.
+# === TICKER GROUPS FOR THREE MODELS ===
+
+# --- Model A (Original #1) ---
 tickers_model_a_report = [
     "DE", "VRSN", "GDDY", "AMCR", "NCLH", "CPB", "MRNA", "MTCH", "FICO",
     "WBD", "WBA", "VTRS", "MSCI", "TSLA", "CZR", "BA", "WYNN", "ADBE", "ABNB",
@@ -28,22 +30,21 @@ tickers_model_a_report = [
     "SYK", "ORLY", "LEN", "PODD", "AMGN", "ARE", "AXON", "CDNS", "UBER", "PARA",
     "PLTR", "MGM", "PEG", "GEN", "TRMB", "NTAP", "INTC", "EPAM", "TDG", "ENPH", "BF-B"
 ]
-tickers_model_b_report = [
-    "CPB", "WBA", "MGM", "LYV", "MRNA", "VRSN", "DE", "FICO", "GDDY", "PLTR",
-    "CZR", "WBD", "ABNB", "ORLY", "LVS", "VTRS", "ADSK", "DELL", "NCLH", "MTCH",
-    "BA", "STX", "ARE", "AMCR", "ON", "IVZ", "FTNT", "IRM", "TDG", "DPZ", "CAH",
-    "INTC", "LOW", "CRWD", "NVDA", "BKNG", "HOLX", "COIN", "AZO", "LEN", "MSCI",
-    "DLTR", "CCL", "YUM", "WYNN", "MCHP", "DVA", "CCI", "ANET", "DAY"
-]
-
-# These represent the top N stocks predicted using the LIVE PRICE to calculate real-time upside.
-# I've slightly modified them for demonstration purposes.
 tickers_model_a_live = [
     "ENPH", "DE", "FICO", "GDDY", "CPB", "AMCR", "VRSN", "MRNA", "ADBE",
     "VTRS", "NCLH", "DPZ", "CZR", "MSCI", "AAPL", "WBA", "DVA", "CNC", "MTCH",
     "ARE", "WYNN", "EPAM", "REG", "ORLY", "PYPL", "PODD", "SYK", "ADSK", "ABNB",
     "LEN", "WBD", "CRWD", "CDNS", "TMUS", "UBER", "BF-B", "ELV", "BA", "IT",
     "NTAP", "MKTX", "TRMB", "GEN", "AMGN", "CAG", "PARA", "PAYC", "PEG", "BBY", "TDG"
+]
+
+# --- Model B (Original #2) ---
+tickers_model_b_report = [
+    "CPB", "WBA", "MGM", "LYV", "MRNA", "VRSN", "DE", "FICO", "GDDY", "PLTR",
+    "CZR", "WBD", "ABNB", "ORLY", "LVS", "VTRS", "ADSK", "DELL", "NCLH", "MTCH",
+    "BA", "STX", "ARE", "AMCR", "ON", "IVZ", "FTNT", "IRM", "TDG", "DPZ", "CAH",
+    "INTC", "LOW", "CRWD", "NVDA", "BKNG", "HOLX", "COIN", "AZO", "LEN", "MSCI",
+    "DLTR", "CCL", "YUM", "WYNN", "MCHP", "DVA", "CCI", "ANET", "DAY"
 ]
 tickers_model_b_live = [
     "CPB", "ENPH", "LULU", "WBA", "FICO", "MRNA", "MGM", "CZR", "GDDY", "ARE",
@@ -53,13 +54,29 @@ tickers_model_b_live = [
     "NCLH", "CNC", "IT", "FTNT", "MHK", "MOH", "PCG", "UBER", "MSCI", "VRSK"
 ]
 
+# --- Model C (The New, Backtested & Corrected Model) ---
+# TODO: Replace these placeholder tickers with your actual new model outputs.
+tickers_model_c_report = [
+   'ENPH', 'SMCI', 'NVDA', 'NCLH', 'EQT', 'PLTR', 'FSLR', 'DECK', 'GM', 'MRNA',
+   'TKO', 'LVS', 'FTI', 'FICO', 'FTNT', 'LRCX', 'AXON', 'ORLY', 'BX', 'PWR',
+   'JBL', 'IT', 'STX', 'ANET', 'PANW', 'ABNB', 'AMZN', 'STLD', 'TSLA', 'HPQ',
+   'MCK', 'COIN', 'MPWR', 'LYV', 'AVGO', 'AMAT', 'DELL', 'CRWD', 'VTRS', 'AAPL',
+   'DASH', 'MCHP', 'EXPE', 'COR', 'CAH', 'CF', 'REGN', 'KLAC', 'PARA', 'F'
+]
+tickers_model_c_live = [
+   'ENPH', 'SMCI', 'NVDA', 'NCLH', 'EQT', 'FSLR', 'DECK', 'MRNA', 'GM', 'PLTR',
+   'TKO', 'LVS', 'FICO', 'FTNT', 'LRCX', 'ORLY', 'PWR', 'BX', 'JBL', 'AXON',
+   'IT', 'STX', 'PANW', 'ANET', 'PARA', 'ABNB', 'AMZN', 'HPQ', 'STLD', 'TSLA',
+   'MCK', 'APA', 'MPWR', 'LYV', 'COIN', 'AVGO', 'AMAT', 'DELL', 'VTRS', 'CRWD',
+   'DASH', 'AAPL', 'CZR', 'MCHP', 'EXPE', 'COR', 'F', 'CAH', 'CF', 'REGN'
+]
+
 
 # Combine all unique tickers for a single data fetch
 all_tickers_to_fetch = list(set(
-    tickers_model_a_report + tickers_model_b_report +
-    tickers_model_a_live + tickers_model_b_live + [benchmark]
+    tickers_model_a_report + tickers_model_b_report + tickers_model_c_report +
+    tickers_model_a_live + tickers_model_b_live + tickers_model_c_live + [benchmark]
 ))
-
 
 # === STREAMLIT SETUP ===
 st.set_page_config(page_title="Sirius Tracker", layout="wide")
@@ -68,13 +85,13 @@ st.markdown(f"Tracking real returns from **{purchase_date}** to **{today}**")
 
 
 # === FMP PRICE FETCHER (CACHED) ===
-@st.cache_data(ttl=43200) # Cache data for 12 hours
+@st.cache_data(ttl=43200)
 def fetch_fmp_price_history(symbol, from_date, to_date):
-    """Fetches historical close prices for a given symbol."""
-    api_key = st.secrets["FMP_API_KEY"]
+    api_key = st.secrets.get("FMP_API_KEY", "")
+    if not api_key: st.error("FMP_API_KEY secret not found!"); return pd.Series(dtype=float)
     url = f"https://financialmodelingprep.com/api/v3/historical-price-full/{symbol}?from={from_date}&to={to_date}&apikey={api_key}"
     try:
-        res = requests.get(url)
+        res = requests.get(url, timeout=10)
         res.raise_for_status()
         hist = res.json().get("historical", [])
         if not hist: return pd.Series(dtype=float)
@@ -94,11 +111,9 @@ for i, symbol in enumerate(all_tickers_to_fetch):
     if not s.empty: price_data[symbol] = s
     else: errors.append(symbol)
     progress_bar.progress((i + 1) / len(all_tickers_to_fetch), text=f"📡 Fetching {symbol}...")
-
 progress_bar.empty()
 if errors: st.error(f"❌ Failed to fetch data for: {', '.join(errors)}")
 else: st.success("✅ All price data loaded successfully")
-
 
 # === CALCULATE INDIVIDUAL STOCK RETURNS ===
 returns = {}
@@ -109,122 +124,126 @@ for symbol, s in price_data.items():
     value = (investment_per_stock / buy_price) * current_price
     returns[symbol] = ((value - investment_per_stock) / investment_per_stock) * 100
 
-
 # === REUSABLE FUNCTIONS ===
 def portfolio_return(symbols):
-    """Calculates the average return for a given list of symbols."""
-    vals = [returns.get(s, 0) for s in symbols]
+    vals = [returns.get(s, 0) for s in symbols if s in returns]
     return sum(vals) / len(vals) if vals else 0
 
 def create_bar_chart(title, tickers, all_model_tickers):
-    """Creates a Plotly bar chart for a given model's returns."""
     st.subheader(title)
     tickers_top_n = tickers[:PORTFOLIO_SIZE_TOP_N]
-
     top_n_ret = portfolio_return(tickers_top_n)
     total_ret = portfolio_return(all_model_tickers)
-    spy = price_data.get(benchmark, pd.Series())
-    spy_return = ((spy.iloc[-1] - spy.iloc[0]) / spy.iloc[0]) * 100 if not spy.empty else 0
-
+    spy_series = price_data.get(benchmark)
+    spy_return = ((spy_series.iloc[-1] - spy_series.iloc[0]) / spy_series.iloc[0]) * 100 if spy_series is not None and not spy_series.empty else 0
     bar_labels = tickers_top_n + [f"🔝 Top {PORTFOLIO_SIZE_TOP_N}", "📦 Total Portfolio", f"📈 {benchmark}"]
     bar_returns = [returns.get(t, 0) for t in tickers_top_n] + [top_n_ret, total_ret, spy_return]
-    bar_colors = (
-        ["#97E956" if r > 0 else "#F44A46" for r in bar_returns[:PORTFOLIO_SIZE_TOP_N]] +
-        ["#057DC9", "#288CFF", "orange"]
-    )
-    fig = go.Figure(data=[go.Bar(
-        x=bar_labels, y=bar_returns, marker_color=bar_colors,
-        text=[f"{r:.1f}%" for r in bar_returns], textposition="outside"
-    )])
-    fig.update_layout(
-        template="plotly_dark", title=f"Returns Since {purchase_date}",
-        yaxis_title="Return (%)", height=550
-    )
+    bar_colors = (["#97E956" if r > spy_return else "#F44A46" for r in bar_returns[:PORTFOLIO_SIZE_TOP_N]] + ["#057DC9", "#288CFF", "orange"])
+    fig = go.Figure(data=[go.Bar(x=bar_labels, y=bar_returns, marker_color=bar_colors, text=[f"{r:.1f}%" for r in bar_returns], textposition="outside")])
+    fig.update_layout(template="plotly_dark", title=f"Returns Since {purchase_date}", yaxis_title="Return (%)", height=550)
     st.plotly_chart(fig, use_container_width=True)
 
-def calculate_portfolio_evolution(symbols):
-    """Calculates the total value of a portfolio over time."""
+def calculate_portfolio_gain_pct(symbols):
+    if not symbols: return pd.Series(dtype=float)
+    initial_investment = len(symbols) * investment_per_stock
     portfolio_values = []
     for symbol in symbols:
         price_series = price_data.get(symbol)
         if price_series is not None and not price_series.empty:
             buy_price = price_series.iloc[0]
-            shares = investment_per_stock / buy_price
-            portfolio_values.append(shares * price_series)
+            if buy_price > 0:
+                shares = investment_per_stock / buy_price
+                portfolio_values.append(shares * price_series)
     if not portfolio_values: return pd.Series(dtype=float)
-    return pd.concat(portfolio_values, axis=1).sum(axis=1)
-
+    total_value_over_time = pd.concat(portfolio_values, axis=1).sum(axis=1)
+    gain_pct_series = ((total_value_over_time - initial_investment) / initial_investment) * 100
+    return gain_pct_series
 
 # === 1. SIDE-BY-SIDE MODEL BREAKDOWNS ===
-st.header("📊 Model A: Report Price vs. Live Price Predictions")
+st.header("📊 Model A (Original #1)")
 col1a, col2a = st.columns(2)
-with col1a:
-    create_bar_chart("Model A (Report Price)", tickers_model_a_report, tickers_model_a_report)
-with col2a:
-    create_bar_chart("Model A (Live Price)", tickers_model_a_live, tickers_model_a_live)
+with col1a: create_bar_chart("Model A (Report Price)", tickers_model_a_report, tickers_model_a_report)
+with col2a: create_bar_chart("Model A (Live Price)", tickers_model_a_live, tickers_model_a_live)
 
-st.header("📊 Model B: Report Price vs. Live Price Predictions")
+st.header("📊 Model B (Original #2)")
 col1b, col2b = st.columns(2)
-with col1b:
-    create_bar_chart("Model B (Report Price)", tickers_model_b_report, tickers_model_b_report)
-with col2b:
-    create_bar_chart("Model B (Live Price)", tickers_model_b_live, tickers_model_b_live)
+with col1b: create_bar_chart("Model B (Report Price)", tickers_model_b_report, tickers_model_b_report)
+with col2b: create_bar_chart("Model B (Live Price)", tickers_model_b_live, tickers_model_b_live)
+
+# NEW: Added charts for Model C
+st.header("📊 Model C (New Backtested Model)")
+col1c, col2c = st.columns(2)
+with col1c: create_bar_chart("Model C (Report Price)", tickers_model_c_report, tickers_model_c_report)
+with col2c: create_bar_chart("Model C (Live Price)", tickers_model_c_live, tickers_model_c_live)
 
 # === 2. COMBINED PORTFOLIO PERFORMANCE PLOT ===
-st.header("📈 Combined Portfolio Value Evolution")
+st.header("📈 Portfolio Gain (%) Evolution")
 
 # Calculate evolution for all portfolios
-evo_a_report = calculate_portfolio_evolution(tickers_model_a_report)
-evo_a_live = calculate_portfolio_evolution(tickers_model_a_live)
-evo_b_report = calculate_portfolio_evolution(tickers_model_b_report)
-evo_b_live = calculate_portfolio_evolution(tickers_model_b_live)
-# For SPY, scale the initial investment to match an average portfolio size for better visual comparison
-avg_portfolio_size = (len(tickers_model_a_report) + len(tickers_model_b_report)) / 2
-evo_spy = calculate_portfolio_evolution([benchmark]) * avg_portfolio_size
+gain_a_report = calculate_portfolio_gain_pct(tickers_model_a_report)
+gain_a_live = calculate_portfolio_gain_pct(tickers_model_a_live)
+gain_b_report = calculate_portfolio_gain_pct(tickers_model_b_report)
+gain_b_live = calculate_portfolio_gain_pct(tickers_model_b_live)
+gain_c_report = calculate_portfolio_gain_pct(tickers_model_c_report)
+gain_c_live = calculate_portfolio_gain_pct(tickers_model_c_live)
+
+gain_a_report_top10 = calculate_portfolio_gain_pct(tickers_model_a_report[:PORTFOLIO_SIZE_TOP_N])
+gain_a_live_top10 = calculate_portfolio_gain_pct(tickers_model_a_live[:PORTFOLIO_SIZE_TOP_N])
+gain_b_report_top10 = calculate_portfolio_gain_pct(tickers_model_b_report[:PORTFOLIO_SIZE_TOP_N])
+gain_b_live_top10 = calculate_portfolio_gain_pct(tickers_model_b_live[:PORTFOLIO_SIZE_TOP_N])
+gain_c_report_top10 = calculate_portfolio_gain_pct(tickers_model_c_report[:PORTFOLIO_SIZE_TOP_N])
+gain_c_live_top10 = calculate_portfolio_gain_pct(tickers_model_c_live[:PORTFOLIO_SIZE_TOP_N])
+
+spy_prices = price_data.get(benchmark)
+gain_spy = pd.Series(dtype=float)
+if spy_prices is not None and not spy_prices.empty:
+    gain_spy = (spy_prices / spy_prices.iloc[0] - 1) * 100
 
 fig_line = go.Figure()
-if not evo_a_report.empty: fig_line.add_trace(go.Scatter(x=evo_a_report.index, y=evo_a_report, mode='lines', name='Model A (Report)', line=dict(color='royalblue', dash='solid')))
-if not evo_a_live.empty: fig_line.add_trace(go.Scatter(x=evo_a_live.index, y=evo_a_live, mode='lines', name='Model A (Live)', line=dict(color='royalblue', dash='dash')))
-if not evo_b_report.empty: fig_line.add_trace(go.Scatter(x=evo_b_report.index, y=evo_b_report, mode='lines', name='Model B (Report)', line=dict(color='mediumseagreen', dash='solid')))
-if not evo_b_live.empty: fig_line.add_trace(go.Scatter(x=evo_b_live.index, y=evo_b_live, mode='lines', name='Model B (Live)', line=dict(color='mediumseagreen', dash='dash')))
-if not evo_spy.empty: fig_line.add_trace(go.Scatter(x=evo_spy.index, y=evo_spy, mode='lines', name='SPY (Benchmark)', line=dict(color='orange', width=3)))
+# Model C (New Model) - Thicker, more prominent lines
+if not gain_c_report.empty: fig_line.add_trace(go.Scatter(x=gain_c_report.index, y=gain_c_report, mode='lines', name='Model C (Report)', line=dict(color='#ff3366', width=3)))
+if not gain_c_live.empty: fig_line.add_trace(go.Scatter(x=gain_c_live.index, y=gain_c_live, mode='lines', name='Model C (Live)', line=dict(color='#9d37fe', width=3)))
+if not gain_c_report_top10.empty: fig_line.add_trace(go.Scatter(x=gain_c_report_top10.index, y=gain_c_report_top10, mode='lines', name=f'Model C (Report) [Top {PORTFOLIO_SIZE_TOP_N}]', line=dict(color='#ff3366', dash='dash')))
+if not gain_c_live_top10.empty: fig_line.add_trace(go.Scatter(x=gain_c_live_top10.index, y=gain_c_live_top10, mode='lines', name=f'Model C (Live) [Top {PORTFOLIO_SIZE_TOP_N}]', line=dict(color='#9d37fe', dash='dash')))
+# Original Models - Thinner lines
+if not gain_a_report.empty: fig_line.add_trace(go.Scatter(x=gain_a_report.index, y=gain_a_report, mode='lines', name='Model A (Report)', line=dict(color='royalblue', width=2)))
+if not gain_a_live.empty: fig_line.add_trace(go.Scatter(x=gain_a_live.index, y=gain_a_live, mode='lines', name='Model A (Live)', line=dict(color='slateblue', width=2)))
+if not gain_b_report.empty: fig_line.add_trace(go.Scatter(x=gain_b_report.index, y=gain_b_report, mode='lines', name='Model B (Report)', line=dict(color='mediumseagreen', width=2)))
+if not gain_b_live.empty: fig_line.add_trace(go.Scatter(x=gain_b_live.index, y=gain_b_live, mode='lines', name='Model B (Live)', line=dict(color='#00f9ff', width=2)))
+# Benchmark
+if not gain_spy.empty: fig_line.add_trace(go.Scatter(x=gain_spy.index, y=gain_spy, mode='lines', name='SPY (Benchmark)', line=dict(color='orange', width=3, dash='dot')))
 
-fig_line.update_layout(template="plotly_dark", title="Portfolio Growth Over Time", yaxis_title="Total Portfolio Value ($)", legend_title="Portfolio")
+fig_line.update_layout(template="plotly_dark", title="Portfolio Growth Over Time", yaxis_title="Total Gain (%)", legend_title="Portfolio", height=600)
 st.plotly_chart(fig_line, use_container_width=True)
-
 
 # === 3. UNIFIED STOCK MEMBERSHIP TABLE ===
 st.header("📋 Master Stock List")
 all_portfolio_tickers = sorted(list(set(
-    tickers_model_a_report + tickers_model_b_report +
-    tickers_model_a_live + tickers_model_b_live
+    tickers_model_a_report + tickers_model_a_live +
+    tickers_model_b_report + tickers_model_b_live +
+    tickers_model_c_report + tickers_model_c_live
 )))
 
 table_data = []
 for symbol in all_portfolio_tickers:
-    if symbol in price_data:
+    if symbol in price_data and symbol in returns:
         table_data.append({
-            "Symbol": symbol,
-            "Current Price": price_data[symbol].iloc[-1],
-            "Return %": returns.get(symbol, 0),
-            "In Model A (Report)": symbol in tickers_model_a_report,
-            "In Model A (Live)": symbol in tickers_model_a_live,
-            "In Model B (Report)": symbol in tickers_model_b_report,
-            "In Model B (Live)": symbol in tickers_model_b_live,
+            "Symbol": symbol, "Current Price": price_data[symbol].iloc[-1], "Return %": returns[symbol],
+            "In Model A (Report)": symbol in tickers_model_a_report, "In Model A (Live)": symbol in tickers_model_a_live,
+            "In Model B (Report)": symbol in tickers_model_b_report, "In Model B (Live)": symbol in tickers_model_b_live,
+            "In Model C (Report)": symbol in tickers_model_c_report, "In Model C (Live)": symbol in tickers_model_c_live,
         })
 
 if table_data:
-    membership_df = pd.DataFrame(table_data)
+    membership_df = pd.DataFrame(table_data).sort_values("Return %", ascending=False)
     st.dataframe(
-        membership_df,
-        use_container_width=True,
+        membership_df, use_container_width=True,
         column_config={
             "Current Price": st.column_config.NumberColumn(format="$%.2f"),
-            "Return %": st.column_config.NumberColumn(format="%.2f%%"),
-            "In Model A (Report)": st.column_config.CheckboxColumn(disabled=True),
-            "In Model A (Live)": st.column_config.CheckboxColumn(disabled=True),
-            "In Model B (Report)": st.column_config.CheckboxColumn(disabled=True),
-            "In Model B (Live)": st.column_config.CheckboxColumn(disabled=True),
+            "Return %": st.column_config.ProgressColumn(format="%.2f%%", min_value=-100, max_value=max(100, membership_df["Return %"].max())),
+            "In Model A (Report)": st.column_config.CheckboxColumn(disabled=True), "In Model A (Live)": st.column_config.CheckboxColumn(disabled=True),
+            "In Model B (Report)": st.column_config.CheckboxColumn(disabled=True), "In Model B (Live)": st.column_config.CheckboxColumn(disabled=True),
+            "In Model C (Report)": st.column_config.CheckboxColumn(disabled=True), "In Model C (Live)": st.column_config.CheckboxColumn(disabled=True),
         },
-        hide_index=True
+        hide_index=True, height=600
     )
