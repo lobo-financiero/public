@@ -7,48 +7,46 @@ from datetime import datetime
 import plotly.graph_objects as go
 from pandas.tseries.offsets import BDay
 
-# === CONFIGURATION ===
+# === CONFIGURATION (Corrected & Market-Aware) ===
 
-# --- 1. Define initial date strings ---
+# --- 1. Define initial date strings and constants ---
 purchase_date_str = "2025-06-18"
 benchmark = "SPY"
 investment_per_stock = 100
-PORTFOLIO_SIZE_TOP_N = 10 # Define how many "top" stocks to show
+PORTFOLIO_SIZE_TOP_N = 10
+MARKET_CLOSE_TIME = time(16, 15) # Use 4:15 PM to give EOD data time to update.
 
 # --- 2. Create a reusable, robust function for date adjustment ---
 def adjust_to_previous_bday(date_obj):
-    """
-    Checks if a date is a business day. If not, rolls it back to the previous one.
-    This is essential for ensuring we query dates with actual market data.
-    """
-    # The BDay().is_on_offset() checks if the date is a business day (not weekend/holiday)
+    """Checks if a date is a business day. If not, rolls it back to the previous one."""
     if not BDay().is_on_offset(date_obj):
-        # If it's not a business day, subtract 1 business day to get the previous one.
         return date_obj - BDay()
-    # If it is already a business day, return it unchanged.
     return date_obj
 
 # --- 3. Process and adjust the purchase_date ---
-# Convert the string to a pandas Timestamp, which is more powerful than datetime.
 purchase_date_dt = pd.to_datetime(purchase_date_str)
-# Adjust it to the last valid business day if needed.
 adjusted_purchase_date_dt = adjust_to_previous_bday(purchase_date_dt)
-# Finally, convert the adjusted date object back to a string for the API call.
 purchase_date = adjusted_purchase_date_dt.strftime("%Y-%m-%d")
 
 
-# --- 4. Process and adjust the current_date (THE CRITICAL FIX) ---
+# --- 4. Process and adjust the current_date (SMART T-1 LOGIC) ---
 # Step A: Get the current time in the US/Eastern timezone.
 eastern_now = pd.Timestamp.now(tz='US/Eastern')
 
-# Step B: ALWAYS subtract one business day. This ensures we are always
-#         requesting data for the last completed market session.
-#         This is the most robust way to guarantee you get clean, final EOD data.
-adjusted_today_dt = eastern_now - BDay()
+# Step B: Check if the current time is AFTER the market has closed for the day.
+if eastern_now.time() > MARKET_CLOSE_TIME:
+    # If we are past the close, we can confidently use today's date.
+    # We still run it through the adjuster in case today is a weekend/holiday.
+    final_today_dt = adjust_to_previous_bday(eastern_now)
+else:
+    # If the market is still open (or it's before the open), we MUST use
+    # the previous business day to get clean EOD data.
+    final_today_dt = eastern_now - BDay()
 
 # Step C: Convert the final, correct date back to a string for the API call.
-today = adjusted_today_dt.strftime("%Y-%m-%d")
+today = final_today_dt.strftime("%Y-%m-%d")
 
+st.caption(f"Market data is current as of the end of day: **{today}**")
 # === TICKER GROUPS FOR THREE MODELS ===
 
 # --- Model A (Original #1) ---
@@ -113,7 +111,7 @@ st.title("🌌 Sirius Portfolio Tracker")
 st.markdown(f"Tracking real returns from **{purchase_date}** to **{today}**")
 
 # === FMP PRICE FETCHER (CACHED) ===
-@st.cache_data(ttl=43200)
+@st.cache_data(ttl=86400)
 def fetch_fmp_price_history(symbol, from_date, to_date):
     api_key = st.secrets.get("FMP_API_KEY", "")
     if not api_key: st.error("FMP_API_KEY secret not found!"); return pd.Series(dtype=float)
