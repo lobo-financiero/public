@@ -157,17 +157,62 @@ def portfolio_return(symbols):
     return sum(vals) / len(vals) if vals else 0
 
 def create_bar_chart(title, tickers, all_model_tickers):
+    """Creates a Plotly bar chart with a special outline for negative returns."""
     st.subheader(title)
     tickers_top_n = tickers[:PORTFOLIO_SIZE_TOP_N]
+
     top_n_ret = portfolio_return(tickers_top_n)
     total_ret = portfolio_return(all_model_tickers)
     spy_series = price_data.get(benchmark)
     spy_return = ((spy_series.iloc[-1] - spy_series.iloc[0]) / spy_series.iloc[0]) * 100 if spy_series is not None and not spy_series.empty else 0
+
     bar_labels = tickers_top_n + [f"🔝 Top {PORTFOLIO_SIZE_TOP_N}", "📦 Total Portfolio", f"📈 {benchmark}"]
     bar_returns = [returns.get(t, 0) for t in tickers_top_n] + [top_n_ret, total_ret, spy_return]
+
+    # --- Main Color Logic (vs. Benchmark) ---
     bar_colors = (["#97E956" if r > spy_return else "#F44A46" for r in bar_returns[:PORTFOLIO_SIZE_TOP_N]] + ["#057DC9", "#288CFF", "orange"])
-    fig = go.Figure(data=[go.Bar(x=bar_labels, y=bar_returns, marker_color=bar_colors, text=[f"{r:.1f}%" for r in bar_returns], textposition="outside")])
-    fig.update_layout(template="plotly_dark", title=f"Returns Since {purchase_date}", yaxis_title="Return (%)", height=550)
+
+    ## --- NEW: Secondary Logic for Negative Return Indicator (Border) ---
+    # Create lists to define the border color and width for each bar
+    marker_line_colors = []
+    marker_line_widths = []
+
+    # Loop through only the individual stock returns
+    for r in bar_returns[:PORTFOLIO_SIZE_TOP_N]:
+        if r < 0:
+            # If the return is absolutely negative, add a white border
+            marker_line_colors.append("white")
+            marker_line_widths.append(2) # A noticeable width
+        else:
+            # Otherwise, no border
+            marker_line_colors.append("rgba(0,0,0,0)") # Transparent color
+            marker_line_widths.append(0)
+
+    # Add no border for the summary bars at the end
+    marker_line_colors.extend(["rgba(0,0,0,0)"] * 3)
+    marker_line_widths.extend([0] * 3)
+    
+    ## --- UPDATED: Use the full `marker` dictionary to apply all styles ---
+    fig = go.Figure(data=[go.Bar(
+        x=bar_labels,
+        y=bar_returns,
+        text=[f"{r:.1f}%" for r in bar_returns],
+        textposition="outside",
+        marker=dict(
+            color=bar_colors, # Main fill color
+            line=dict(
+                color=marker_line_colors, # Border color
+                width=marker_line_widths  # Border width
+            )
+        )
+    )])
+
+    fig.update_layout(
+        template="plotly_dark",
+        title=f"Returns Since {purchase_date}",
+        yaxis_title="Return (%)",
+        height=550
+    )
     st.plotly_chart(fig, use_container_width=True)
 
 def calculate_portfolio_gain_pct(symbols):
