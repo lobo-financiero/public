@@ -112,7 +112,7 @@ st.title("🌌 Sirius Portfolio Tracker")
 st.markdown(f"Tracking real returns from **{purchase_date}** to **{today}**")
 
 # === FMP PRICE FETCHER (CACHED) ===
-#@st.cache_data(ttl=43200)
+@st.cache_data(ttl=43200)
 def fetch_fmp_price_history(symbol, from_date, to_date):
     api_key = st.secrets.get("FMP_API_KEY", "")
     if not api_key: st.error("FMP_API_KEY secret not found!"); return pd.Series(dtype=float)
@@ -181,7 +181,7 @@ def create_bar_chart(title, tickers, all_model_tickers):
     for r in bar_returns[:PORTFOLIO_SIZE_TOP_N]:
         if r < 0:
             # If the return is absolutely negative, add a white border
-            marker_line_colors.append("white")
+            marker_line_colors.append("lightcoral")
             marker_line_widths.append(2) # A noticeable width
         else:
             # Otherwise, no border
