@@ -283,10 +283,10 @@ color_map = {
 
 # Restructured to be explicit and avoid conflicts
 style_map = {
-    'full_report':   {'dash': 'dashdot', 'width': 3},
+    'full_report':   {'dash': 'dash', 'width': 3},
     'full_live':     {'dash': 'solid', 'width': 3},
-    'top10_report':  {'dash': 'dash', 'width': 2},
-    'top10_live':    {'dash': 'longdash', 'width': 2},
+    'top10_report':  {'dash': 'dot', 'width': 2},
+    'top10_live':    {'dash': 'dot', 'width': 2},
     'benchmark':     {'dash': 'solid', 'width': 3}
 }
 
