@@ -7,23 +7,39 @@ from datetime import datetime
 import plotly.graph_objects as go
 from pandas.tseries.offsets import BDay
 
-# === CONFIGURATION ===
-purchase_date = "2025-06-18"
-# Get purchase date, adjusted for business days
-if BDay().is_on_offset(purchase_date):
-    purchase_date = purchase_date.strftime("%Y-%m-%d")
-else:
-    purchase_date = (purchase_date - BDay(1)).strftime("%Y-%m-%d")
+# === CONFIGURATION (Corrected) ===
+
+# --- 1. Define initial date strings ---
+purchase_date_str = "2025-06-18"
 benchmark = "SPY"
 investment_per_stock = 100
 PORTFOLIO_SIZE_TOP_N = 10 # Define how many "top" stocks to show
 
-# Get current date, adjusted for business days
-current_date = datetime.today()
-if BDay().is_on_offset(current_date):
-    today = current_date.strftime("%Y-%m-%d")
-else:
-    today = (current_date - BDay(1)).strftime("%Y-%m-%d")
+# --- 2. Create a reusable function for date adjustment ---
+def adjust_to_previous_bday(date_obj):
+    """Checks if a date is a business day. If not, rolls it back to the previous one."""
+    # The BDay().is_on_offset() checks if the date is a business day (not weekend/holiday)
+    if not BDay().is_on_offset(date_obj):
+        # If it's not a business day, subtract 1 business day to get the previous one.
+        return date_obj - BDay()
+    # If it is already a business day, return it unchanged.
+    return date_obj
+
+# --- 3. Process and adjust the purchase_date ---
+# First, convert the string to a datetime object.
+purchase_date_dt = pd.to_datetime(purchase_date_str)
+# Now, use the function to get the adjusted date object.
+adjusted_purchase_date_dt = adjust_to_previous_bday(purchase_date_dt)
+# Finally, convert the adjusted date object back to a string for the API call.
+purchase_date = adjusted_purchase_date_dt.strftime("%Y-%m-%d")
+
+# --- 4. Process and adjust the current_date ---
+# Start with a datetime object.
+current_date_dt = datetime.today()
+# Use the same function to get the adjusted date object.
+adjusted_today_dt = adjust_to_previous_bday(current_date_dt)
+# Finally, convert back to a string for the API call.
+today = adjusted_today_dt.strftime("%Y-%m-%d")
 
 # === TICKER GROUPS FOR THREE MODELS ===
 
@@ -88,9 +104,8 @@ st.set_page_config(page_title="Sirius Tracker", layout="wide")
 st.title("🌌 Sirius Portfolio Tracker")
 st.markdown(f"Tracking real returns from **{purchase_date}** to **{today}**")
 
-
 # === FMP PRICE FETCHER (CACHED) ===
-@st.cache_data(ttl=43200)
+#@st.cache_data(ttl=43200)
 def fetch_fmp_price_history(symbol, from_date, to_date):
     api_key = st.secrets.get("FMP_API_KEY", "")
     if not api_key: st.error("FMP_API_KEY secret not found!"); return pd.Series(dtype=float)
