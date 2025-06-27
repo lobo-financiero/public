@@ -7,7 +7,7 @@ from datetime import datetime
 import plotly.graph_objects as go
 from pandas.tseries.offsets import BDay
 
-# === CONFIGURATION (Corrected) ===
+# === CONFIGURATION ===
 
 # --- 1. Define initial date strings ---
 purchase_date_str = "2025-06-18"
@@ -15,9 +15,12 @@ benchmark = "SPY"
 investment_per_stock = 100
 PORTFOLIO_SIZE_TOP_N = 10 # Define how many "top" stocks to show
 
-# --- 2. Create a reusable function for date adjustment ---
+# --- 2. Create a reusable, robust function for date adjustment ---
 def adjust_to_previous_bday(date_obj):
-    """Checks if a date is a business day. If not, rolls it back to the previous one."""
+    """
+    Checks if a date is a business day. If not, rolls it back to the previous one.
+    This is essential for ensuring we query dates with actual market data.
+    """
     # The BDay().is_on_offset() checks if the date is a business day (not weekend/holiday)
     if not BDay().is_on_offset(date_obj):
         # If it's not a business day, subtract 1 business day to get the previous one.
@@ -26,19 +29,23 @@ def adjust_to_previous_bday(date_obj):
     return date_obj
 
 # --- 3. Process and adjust the purchase_date ---
-# First, convert the string to a datetime object.
+# Convert the string to a pandas Timestamp, which is more powerful than datetime.
 purchase_date_dt = pd.to_datetime(purchase_date_str)
-# Now, use the function to get the adjusted date object.
+# Adjust it to the last valid business day if needed.
 adjusted_purchase_date_dt = adjust_to_previous_bday(purchase_date_dt)
 # Finally, convert the adjusted date object back to a string for the API call.
 purchase_date = adjusted_purchase_date_dt.strftime("%Y-%m-%d")
 
-# --- 4. Process and adjust the current_date ---
-# Start with a datetime object.
-current_date_dt = datetime.today()
-# Use the same function to get the adjusted date object.
-adjusted_today_dt = adjust_to_previous_bday(current_date_dt)
-# Finally, convert back to a string for the API call.
+
+# --- 4. Process and adjust the current_date (THE CRITICAL FIX) ---
+# Step A: Get the current time in UTC, the universal standard.
+utc_now = pd.Timestamp.now(tz='UTC')
+# Step B: Convert it to the US/Eastern timezone to align with market reality.
+# This solves the "off-by-one-day" problem.
+eastern_now = utc_now.tz_convert('US/Eastern')
+# Step C: Use the same adjustment function to handle weekends or holidays.
+adjusted_today_dt = adjust_to_previous_bday(eastern_now)
+# Step D: Convert the final, correct date back to a string for the API call.
 today = adjusted_today_dt.strftime("%Y-%m-%d")
 
 # === TICKER GROUPS FOR THREE MODELS ===
