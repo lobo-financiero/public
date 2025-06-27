@@ -3,7 +3,7 @@
 import streamlit as st
 import pandas as pd
 import requests
-from datetime import datetime
+from datetime import datetime, time
 import plotly.graph_objects as go
 from pandas.tseries.offsets import BDay
 
