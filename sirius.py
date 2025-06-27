@@ -38,14 +38,15 @@ purchase_date = adjusted_purchase_date_dt.strftime("%Y-%m-%d")
 
 
 # --- 4. Process and adjust the current_date (THE CRITICAL FIX) ---
-# Step A: Get the current time in UTC, the universal standard.
-utc_now = pd.Timestamp.now(tz='UTC')
-# Step B: Convert it to the US/Eastern timezone to align with market reality.
-# This solves the "off-by-one-day" problem.
-eastern_now = utc_now.tz_convert('US/Eastern')
-# Step C: Use the same adjustment function to handle weekends or holidays.
-adjusted_today_dt = adjust_to_previous_bday(eastern_now)
-# Step D: Convert the final, correct date back to a string for the API call.
+# Step A: Get the current time in the US/Eastern timezone.
+eastern_now = pd.Timestamp.now(tz='US/Eastern')
+
+# Step B: ALWAYS subtract one business day. This ensures we are always
+#         requesting data for the last completed market session.
+#         This is the most robust way to guarantee you get clean, final EOD data.
+adjusted_today_dt = eastern_now - BDay()
+
+# Step C: Convert the final, correct date back to a string for the API call.
 today = adjusted_today_dt.strftime("%Y-%m-%d")
 
 # === TICKER GROUPS FOR THREE MODELS ===
