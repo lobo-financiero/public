@@ -1,4 +1,4 @@
-#@title Sirius Portfolio Tracker (Dashboard Code with 3 Models)
+#@title Sirius Portfolio Tracker (Dashboard Code with 4 Models, including Vega)
 
 import streamlit as st
 import pandas as pd
@@ -30,84 +30,54 @@ purchase_date = adjusted_purchase_date_dt.strftime("%Y-%m-%d")
 
 
 # --- 4. Process and adjust the current_date (SMART T-1 LOGIC) ---
-# Step A: Get the current time in the US/Eastern timezone.
 eastern_now = pd.Timestamp.now(tz='US/Eastern')
-
-# Step B: Check if the current time is AFTER the market has closed for the day.
 if eastern_now.time() > MARKET_CLOSE_TIME:
-    # If we are past the close, we can confidently use today's date.
-    # We still run it through the adjuster in case today is a weekend/holiday.
     final_today_dt = adjust_to_previous_bday(eastern_now)
 else:
-    # If the market is still open (or it's before the open), we MUST use
-    # the previous business day to get clean EOD data.
     final_today_dt = eastern_now - BDay()
-
-# Step C: Convert the final, correct date back to a string for the API call.
 today = final_today_dt.strftime("%Y-%m-%d")
 
 st.caption(f"Market data is current as of the end of day: **{today}**")
-# === TICKER GROUPS FOR THREE MODELS ===
+
+# === TICKER GROUPS FOR FOUR MODELS ===
 
 # --- Model A (Original #1) ---
-tickers_model_a_report = [
-    "DE", "VRSN", "GDDY", "AMCR", "NCLH", "CPB", "MRNA", "MTCH", "FICO",
-    "WBD", "WBA", "VTRS", "MSCI", "TSLA", "CZR", "BA", "WYNN", "ADBE", "ABNB",
-    "AAPL", "PYPL", "DPZ", "CRWD", "CNC", "REG", "META", "DVA", "ADSK", "GNRC",
-    "SYK", "ORLY", "LEN", "PODD", "AMGN", "ARE", "AXON", "CDNS", "UBER", "PARA",
-    "PLTR", "MGM", "PEG", "GEN", "TRMB", "NTAP", "INTC", "EPAM", "TDG", "ENPH", "BF-B"
-]
-tickers_model_a_live = [
-    "ENPH", "DE", "FICO", "GDDY", "CPB", "AMCR", "VRSN", "MRNA", "ADBE",
-    "VTRS", "NCLH", "DPZ", "CZR", "MSCI", "AAPL", "WBA", "DVA", "CNC", "MTCH",
-    "ARE", "WYNN", "EPAM", "REG", "ORLY", "PYPL", "PODD", "SYK", "ADSK", "ABNB",
-    "LEN", "WBD", "CRWD", "CDNS", "TMUS", "UBER", "BF-B", "ELV", "BA", "IT",
-    "NTAP", "MKTX", "TRMB", "GEN", "AMGN", "CAG", "PARA", "PAYC", "PEG", "BBY", "TDG"
-]
+tickers_model_a_report = ["DE", "VRSN", "GDDY", "AMCR", "NCLH", "CPB", "MRNA", "MTCH", "FICO", "WBD", "WBA", "VTRS", "MSCI", "TSLA", "CZR", "BA", "WYNN", "ADBE", "ABNB", "AAPL", "PYPL", "DPZ", "CRWD", "CNC", "REG", "META", "DVA", "ADSK", "GNRC", "SYK", "ORLY", "LEN", "PODD", "AMGN", "ARE", "AXON", "CDNS", "UBER", "PARA", "PLTR", "MGM", "PEG", "GEN", "TRMB", "NTAP", "INTC", "EPAM", "TDG", "ENPH", "BF-B"]
+tickers_model_a_live = ["ENPH", "DE", "FICO", "GDDY", "CPB", "AMCR", "VRSN", "MRNA", "ADBE", "VTRS", "NCLH", "DPZ", "CZR", "MSCI", "AAPL", "WBA", "DVA", "CNC", "MTCH", "ARE", "WYNN", "EPAM", "REG", "ORLY", "PYPL", "PODD", "SYK", "ADSK", "ABNB", "LEN", "WBD", "CRWD", "CDNS", "TMUS", "UBER", "BF-B", "ELV", "BA", "IT", "NTAP", "MKTX", "TRMB", "GEN", "AMGN", "CAG", "PARA", "PAYC", "PEG", "BBY", "TDG"]
 
 # --- Model B (Original #2) ---
-tickers_model_b_report = [
-    "CPB", "WBA", "MGM", "LYV", "MRNA", "VRSN", "DE", "FICO", "GDDY", "PLTR",
-    "CZR", "WBD", "ABNB", "ORLY", "LVS", "VTRS", "ADSK", "DELL", "NCLH", "MTCH",
-    "BA", "STX", "ARE", "AMCR", "ON", "IVZ", "FTNT", "IRM", "TDG", "DPZ", "CAH",
-    "INTC", "LOW", "CRWD", "NVDA", "BKNG", "HOLX", "COIN", "AZO", "LEN", "MSCI",
-    "DLTR", "CCL", "YUM", "WYNN", "MCHP", "DVA", "CCI", "ANET", "DAY"
-]
-tickers_model_b_live = [
-    "CPB", "ENPH", "LULU", "WBA", "FICO", "MRNA", "MGM", "CZR", "GDDY", "ARE",
-    "DPZ", "DE", "ORLY", "VTRS", "LYV", "LOW", "ADSK", "TPL", "ADBE", "YUM",
-    "CPAY", "CAG", "DVA", "VRSN", "UNH", "DELL", "CCI", "CLX", "AZO", "SBAC",
-    "STZ", "ABNB", "AMCR", "MCD", "HUM", "TMUS", "EPAM", "LEN", "TDG", "ELV",
-    "NCLH", "CNC", "IT", "FTNT", "MHK", "MOH", "PCG", "UBER", "MSCI", "VRSK"
-]
+tickers_model_b_report = ["CPB", "WBA", "MGM", "LYV", "MRNA", "VRSN", "DE", "FICO", "GDDY", "PLTR", "CZR", "WBD", "ABNB", "ORLY", "LVS", "VTRS", "ADSK", "DELL", "NCLH", "MTCH", "BA", "STX", "ARE", "AMCR", "ON", "IVZ", "FTNT", "IRM", "TDG", "DPZ", "CAH", "INTC", "LOW", "CRWD", "NVDA", "BKNG", "HOLX", "COIN", "AZO", "LEN", "MSCI", "DLTR", "CCL", "YUM", "WYNN", "MCHP", "DVA", "CCI", "ANET", "DAY"]
+tickers_model_b_live = ["CPB", "ENPH", "LULU", "WBA", "FICO", "MRNA", "MGM", "CZR", "GDDY", "ARE", "DPZ", "DE", "ORLY", "VTRS", "LYV", "LOW", "ADSK", "TPL", "ADBE", "YUM", "CPAY", "CAG", "DVA", "VRSN", "UNH", "DELL", "CCI", "CLX", "AZO", "SBAC", "STZ", "ABNB", "AMCR", "MCD", "HUM", "TMUS", "EPAM", "LEN", "TDG", "ELV", "NCLH", "CNC", "IT", "FTNT", "MHK", "MOH", "PCG", "UBER", "MSCI", "VRSK"]
 
-# --- Model C (The New, Backtested & Corrected Model) ---
-# TODO: Replace these placeholder tickers with your actual new model outputs.
-tickers_model_c_report = tickers = [
-    "CPB", "ENPH", "MRNA", "CZR", "DE", "NCLH", "TSLA", "MCHP", "PEG", "GDDY",
-    "GNRC", "MGM", "MOS", "KKR", "WBD", "WBA", "AMCR", "EW", "SYK", "MU",
-    "KLAC", "NVDA", "VTRS", "PLTR", "DLTR", "SNPS", "AAPL", "INTC", "COIN", "LEN",
-    "PYPL", "PARA", "CF", "DPZ", "ARE", "NUE", "ADBE", "ORLY", "EA", "VRSN",
-    "AMAT", "MTCH", "ADSK", "ADI", "NTAP", "WYNN", "MHK", "AVGO", "F", "SWKS"
-]
-tickers_model_c_live = [
-    "ENPH", "CPB", "MRNA", "CZR", "DE", "NCLH", "GDDY", "PEG", "LULU", "MCHP",
-    "TSLA", "SYK", "AMCR", "MGM", "GNRC", "KKR", "AAPL", "DPZ", "EW", "VTRS",
-    "ADBE", "ARE", "WBA", "LEN", "SNPS", "MHK", "MOS", "ORLY", "PYPL", "PARA",
-    "NVDA", "INTC", "STLD", "WBD", "ADSK", "DLTR", "IPG", "NTAP", "EA", "AVGO",
-    "HUM", "DVA", "FICO", "LOW", "F", "HPQ", "EPAM", "ELV", "WYNN", "KMX"
-]
+# --- Model C (New Backtested Model) ---
+tickers_model_c_report = ["CPB", "ENPH", "MRNA", "CZR", "DE", "NCLH", "TSLA", "MCHP", "PEG", "GDDY", "GNRC", "MGM", "MOS", "KKR", "WBD", "WBA", "AMCR", "EW", "SYK", "MU", "KLAC", "NVDA", "VTRS", "PLTR", "DLTR", "SNPS", "AAPL", "INTC", "COIN", "LEN", "PYPL", "PARA", "CF", "DPZ", "ARE", "NUE", "ADBE", "ORLY", "EA", "VRSN", "AMAT", "MTCH", "ADSK", "ADI", "NTAP", "WYNN", "MHK", "AVGO", "F", "SWKS"]
+tickers_model_c_live = ["ENPH", "CPB", "MRNA", "CZR", "DE", "NCLH", "GDDY", "PEG", "LULU", "MCHP", "TSLA", "SYK", "AMCR", "MGM", "GNRC", "KKR", "AAPL", "DPZ", "EW", "VTRS", "ADBE", "ARE", "WBA", "LEN", "SNPS", "MHK", "MOS", "ORLY", "PYPL", "PARA", "NVDA", "INTC", "STLD", "WBD", "ADSK", "DLTR", "IPG", "NTAP", "EA", "AVGO", "HUM", "DVA", "FICO", "LOW", "F", "HPQ", "EPAM", "ELV", "WYNN", "KMX"]
 
+# === NEW: Model D (Vega - Your Transformer Model) ===
+tickers_vega_report = [
+    "PYPL", "DLTR", "PNR", "COIN", "SW", "PARA", "AMCR", "GDDY", "ENPH", "OTIS",
+    "AES", "MTCH", "NCLH", "NRG", "GEN", "CNC", "ORLY", "PRU", "MOH", "MCK",
+    "COR", "HPQ", "MOS", "ORCL", "GLW", "FTI", "DPZ", "CTVA", "BA", "DELL",
+    "CI", "HUM", "IVZ", "IRM", "APA", "CAH", "FDS", "IQV", "EQT", "WAT",
+    "CBRE", "LOW", "JNPR", "ELV", "MSCI", "VRSN", "LRCX", "EXPE", "URI", "CHTR"
+]
+tickers_vega_live = [
+    "DLTR", "PNR", "PYPL", "GDDY", "COIN", "LULU", "DPZ", "MOH", "TPL", "MCK",
+    "FICO", "COR", "ELV", "CI", "NRG", "AZO", "HUM", "UNH", "TDG", "CPAY",
+    "ERIE", "MSCI", "FDS", "MTD", "NVR", "GWW", "MSI", "WAT", "IT", "LOW",
+    "CHTR", "BKNG", "REGN", "LMT", "POOL", "ROP", "COST", "LII", "PGR", "STZ",
+    "BRK-B", "WTW", "EG", "MCO", "SHW", "ITW", "PH", "URI", "OTIS", "AON"
+]
 
 # Combine all unique tickers for a single data fetch
 all_tickers_to_fetch = list(set(
-    tickers_model_a_report + tickers_model_b_report + tickers_model_c_report +
-    tickers_model_a_live + tickers_model_b_live + tickers_model_c_live + [benchmark]
+    tickers_model_a_report + tickers_model_b_report + tickers_model_c_report + tickers_vega_report +
+    tickers_model_a_live + tickers_model_b_live + tickers_model_c_live + tickers_vega_live + [benchmark]
 ))
 
 # === STREAMLIT SETUP ===
 st.set_page_config(page_title="Sirius Tracker", layout="wide")
-st.title("🌌 Sirius Portfolio Tracker")
+st.title("🌌 Sirius & Vega Portfolio Tracker")
 st.markdown(f"Tracking real returns from **{purchase_date}** to **{today}**")
 
 # === FMP PRICE FETCHER (CACHED) ===
@@ -156,62 +126,22 @@ def portfolio_return(symbols):
     return sum(vals) / len(vals) if vals else 0
 
 def create_bar_chart(title, tickers, all_model_tickers):
-    """Creates a Plotly bar chart with a special outline for negative returns."""
     st.subheader(title)
     tickers_top_n = tickers[:PORTFOLIO_SIZE_TOP_N]
-
     top_n_ret = portfolio_return(tickers_top_n)
     total_ret = portfolio_return(all_model_tickers)
     spy_series = price_data.get(benchmark)
     spy_return = ((spy_series.iloc[-1] - spy_series.iloc[0]) / spy_series.iloc[0]) * 100 if spy_series is not None and not spy_series.empty else 0
-
     bar_labels = tickers_top_n + [f"🔝 Top {PORTFOLIO_SIZE_TOP_N}", "📦 Total Portfolio", f"📈 {benchmark}"]
     bar_returns = [returns.get(t, 0) for t in tickers_top_n] + [top_n_ret, total_ret, spy_return]
-
-    # --- Main Color Logic (vs. Benchmark) ---
     bar_colors = (["#97E956" if r > spy_return else "#F44A46" for r in bar_returns[:PORTFOLIO_SIZE_TOP_N]] + ["#057DC9", "#288CFF", "orange"])
-
-    ## --- NEW: Secondary Logic for Negative Return Indicator (Border) ---
-    # Create lists to define the border color and width for each bar
-    marker_line_colors = []
-    marker_line_widths = []
-
-    # Loop through only the individual stock returns
+    marker_line_colors, marker_line_widths = [], []
     for r in bar_returns[:PORTFOLIO_SIZE_TOP_N]:
-        if r < 0:
-            # If the return is absolutely negative, add a white border
-            marker_line_colors.append("lightcoral")
-            marker_line_widths.append(2) # A noticeable width
-        else:
-            # Otherwise, no border
-            marker_line_colors.append("rgba(0,0,0,0)") # Transparent color
-            marker_line_widths.append(0)
-
-    # Add no border for the summary bars at the end
-    marker_line_colors.extend(["rgba(0,0,0,0)"] * 3)
-    marker_line_widths.extend([0] * 3)
-    
-    ## --- UPDATED: Use the full `marker` dictionary to apply all styles ---
-    fig = go.Figure(data=[go.Bar(
-        x=bar_labels,
-        y=bar_returns,
-        text=[f"{r:.1f}%" for r in bar_returns],
-        textposition="outside",
-        marker=dict(
-            color=bar_colors, # Main fill color
-            line=dict(
-                color=marker_line_colors, # Border color
-                width=marker_line_widths  # Border width
-            )
-        )
-    )])
-
-    fig.update_layout(
-        template="plotly_dark",
-        title=f"Returns Since {purchase_date}",
-        yaxis_title="Return (%)",
-        height=550
-    )
+        marker_line_colors.append("lightcoral" if r < 0 else "rgba(0,0,0,0)")
+        marker_line_widths.append(2 if r < 0 else 0)
+    marker_line_colors.extend(["rgba(0,0,0,0)"] * 3); marker_line_widths.extend([0] * 3)
+    fig = go.Figure(data=[go.Bar(x=bar_labels, y=bar_returns, text=[f"{r:.1f}%" for r in bar_returns], textposition="outside", marker=dict(color=bar_colors, line=dict(color=marker_line_colors, width=marker_line_widths)))])
+    fig.update_layout(template="plotly_dark", title=f"Returns Since {purchase_date}", yaxis_title="Return (%)", height=550)
     st.plotly_chart(fig, use_container_width=True)
 
 def calculate_portfolio_gain_pct(symbols):
@@ -241,57 +171,47 @@ col1b, col2b = st.columns(2)
 with col1b: create_bar_chart("Model B (Report Price)", tickers_model_b_report, tickers_model_b_report)
 with col2b: create_bar_chart("Model B (Live Price)", tickers_model_b_live, tickers_model_b_live)
 
-# NEW: Added charts for Model C
 st.header("📊 Model C (New Backtested Model)")
 col1c, col2c = st.columns(2)
 with col1c: create_bar_chart("Model C (Report Price)", tickers_model_c_report, tickers_model_c_report)
 with col2c: create_bar_chart("Model C (Live Price)", tickers_model_c_live, tickers_model_c_live)
 
+# NEW: Added charts for Vega
+st.header("📊 Model D (Vega)")
+col1d, col2d = st.columns(2)
+with col1d: create_bar_chart("Vega (Report Price)", tickers_vega_report, tickers_vega_report)
+with col2d: create_bar_chart("Vega (Live Price)", tickers_vega_live, tickers_vega_live)
+
 # === 2. COMBINED PORTFOLIO PERFORMANCE PLOT ===
 st.header("📈 Portfolio Gain (%) Evolution")
 
 # Calculate evolution for all portfolios
-gain_a_report = calculate_portfolio_gain_pct(tickers_model_a_report)
-gain_a_live = calculate_portfolio_gain_pct(tickers_model_a_live)
-gain_b_report = calculate_portfolio_gain_pct(tickers_model_b_report)
-gain_b_live = calculate_portfolio_gain_pct(tickers_model_b_live)
-gain_c_report = calculate_portfolio_gain_pct(tickers_model_c_report)
-gain_c_live = calculate_portfolio_gain_pct(tickers_model_c_live)
+gain_a_report = calculate_portfolio_gain_pct(tickers_model_a_report); gain_a_live = calculate_portfolio_gain_pct(tickers_model_a_live)
+gain_b_report = calculate_portfolio_gain_pct(tickers_model_b_report); gain_b_live = calculate_portfolio_gain_pct(tickers_model_b_live)
+gain_c_report = calculate_portfolio_gain_pct(tickers_model_c_report); gain_c_live = calculate_portfolio_gain_pct(tickers_model_c_live)
+gain_vega_report = calculate_portfolio_gain_pct(tickers_vega_report); gain_vega_live = calculate_portfolio_gain_pct(tickers_vega_live) # New
 
-gain_a_report_top10 = calculate_portfolio_gain_pct(tickers_model_a_report[:PORTFOLIO_SIZE_TOP_N])
-gain_a_live_top10 = calculate_portfolio_gain_pct(tickers_model_a_live[:PORTFOLIO_SIZE_TOP_N])
-gain_b_report_top10 = calculate_portfolio_gain_pct(tickers_model_b_report[:PORTFOLIO_SIZE_TOP_N])
-gain_b_live_top10 = calculate_portfolio_gain_pct(tickers_model_b_live[:PORTFOLIO_SIZE_TOP_N])
-gain_c_report_top10 = calculate_portfolio_gain_pct(tickers_model_c_report[:PORTFOLIO_SIZE_TOP_N])
-gain_c_live_top10 = calculate_portfolio_gain_pct(tickers_model_c_live[:PORTFOLIO_SIZE_TOP_N])
+gain_a_report_top10 = calculate_portfolio_gain_pct(tickers_model_a_report[:PORTFOLIO_SIZE_TOP_N]); gain_a_live_top10 = calculate_portfolio_gain_pct(tickers_model_a_live[:PORTFOLIO_SIZE_TOP_N])
+gain_b_report_top10 = calculate_portfolio_gain_pct(tickers_model_b_report[:PORTFOLIO_SIZE_TOP_N]); gain_b_live_top10 = calculate_portfolio_gain_pct(tickers_model_b_live[:PORTFOLIO_SIZE_TOP_N])
+gain_c_report_top10 = calculate_portfolio_gain_pct(tickers_model_c_report[:PORTFOLIO_SIZE_TOP_N]); gain_c_live_top10 = calculate_portfolio_gain_pct(tickers_model_c_live[:PORTFOLIO_SIZE_TOP_N])
+gain_vega_live_top10 = calculate_portfolio_gain_pct(tickers_vega_live[:PORTFOLIO_SIZE_TOP_N]) # New
 
 spy_prices = price_data.get(benchmark)
 gain_spy = pd.Series(dtype=float)
-if spy_prices is not None and not spy_prices.empty:
-    gain_spy = (spy_prices / spy_prices.iloc[0] - 1) * 100
+if spy_prices is not None and not spy_prices.empty: gain_spy = (spy_prices / spy_prices.iloc[0] - 1) * 100
 
 # Create the plot
 fig_line = go.Figure()
 
 # --- Define the new, robust color and style scheme ---
-color_map = {
-    'A': 'royalblue',
-    'B': 'mediumseagreen',
-    'C': 'crimson',
-    'SPY': 'orange'
-}
-
-# Restructured to be explicit and avoid conflicts
-style_map = {
-    'full_report':   {'dash': 'dash', 'width': 3},
-    'full_live':     {'dash': 'solid', 'width': 3},
-    'top10_report':  {'dash': 'dot', 'width': 2},
-    'top10_live':    {'dash': 'dot', 'width': 2},
-    'benchmark':     {'dash': 'solid', 'width': 3}
-}
-
+color_map = {'A': 'royalblue', 'B': 'mediumseagreen', 'C': 'crimson', 'Vega': 'darkviolet', 'SPY': 'orange'} # New color for Vega
+style_map = {'full_report': {'dash': 'dash', 'width': 3}, 'full_live': {'dash': 'solid', 'width': 3}, 'top10_report': {'dash': 'dot', 'width': 2}, 'benchmark': {'dash': 'solid', 'width': 3}}
 
 # --- Add Traces using the new, clean scheme ---
+# NEW: Vega (Model D)
+if not gain_vega_report.empty: fig_line.add_trace(go.Scatter(x=gain_vega_report.index, y=gain_vega_report, mode='lines', name='Vega (Report)', line=dict(color=color_map['Vega'], **style_map['full_report'])))
+if not gain_vega_live.empty: fig_line.add_trace(go.Scatter(x=gain_vega_live.index, y=gain_vega_live, mode='lines', name='Vega (Live)', line=dict(color=color_map['Vega'], **style_map['full_live'])))
+if not gain_vega_live_top10.empty: fig_line.add_trace(go.Scatter(x=gain_vega_live_top10.index, y=gain_vega_live_top10, mode='lines', name=f'Vega (Top {PORTFOLIO_SIZE_TOP_N})', line=dict(color=color_map['Vega'], **style_map['top10_report'])))
 
 # Model C (New Backtested)
 if not gain_c_report.empty: fig_line.add_trace(go.Scatter(x=gain_c_report.index, y=gain_c_report, mode='lines', name='Model C (Report)', line=dict(color=color_map['C'], **style_map['full_report'])))
@@ -311,23 +231,17 @@ if not gain_a_live_top10.empty: fig_line.add_trace(go.Scatter(x=gain_a_live_top1
 # Benchmark
 if not gain_spy.empty: fig_line.add_trace(go.Scatter(x=gain_spy.index, y=gain_spy, mode='lines', name='SPY (Benchmark)', line=dict(color=color_map['SPY'], **style_map['benchmark'])))
 
-
 # --- Update Layout ---
-fig_line.update_layout(
-    template="plotly_dark",
-    title="Portfolio Growth Over Time",
-    yaxis_title="Total Gain (%)",
-    legend_title="Portfolio",
-    height=600
-)
-
+fig_line.update_layout(template="plotly_dark", title="Portfolio Growth Over Time", yaxis_title="Total Gain (%)", legend_title="Portfolio", height=600)
 st.plotly_chart(fig_line, use_container_width=True)
+
 # === 3. UNIFIED STOCK MEMBERSHIP TABLE ===
 st.header("📋 Master Stock List")
 all_portfolio_tickers = sorted(list(set(
     tickers_model_a_report + tickers_model_a_live +
     tickers_model_b_report + tickers_model_b_live +
-    tickers_model_c_report + tickers_model_c_live
+    tickers_model_c_report + tickers_model_c_live +
+    tickers_vega_report + tickers_vega_live # New
 )))
 
 table_data = []
@@ -338,6 +252,7 @@ for symbol in all_portfolio_tickers:
             "In Model A (Report)": symbol in tickers_model_a_report, "In Model A (Live)": symbol in tickers_model_a_live,
             "In Model B (Report)": symbol in tickers_model_b_report, "In Model B (Live)": symbol in tickers_model_b_live,
             "In Model C (Report)": symbol in tickers_model_c_report, "In Model C (Live)": symbol in tickers_model_c_live,
+            "In Vega (Report)": symbol in tickers_vega_report, "In Vega (Live)": symbol in tickers_vega_live, # New
         })
 
 if table_data:
@@ -350,6 +265,7 @@ if table_data:
             "In Model A (Report)": st.column_config.CheckboxColumn(disabled=True), "In Model A (Live)": st.column_config.CheckboxColumn(disabled=True),
             "In Model B (Report)": st.column_config.CheckboxColumn(disabled=True), "In Model B (Live)": st.column_config.CheckboxColumn(disabled=True),
             "In Model C (Report)": st.column_config.CheckboxColumn(disabled=True), "In Model C (Live)": st.column_config.CheckboxColumn(disabled=True),
+            "In Vega (Report)": st.column_config.CheckboxColumn(disabled=True), "In Vega (Live)": st.column_config.CheckboxColumn(disabled=True), # New
         },
         hide_index=True, height=600
     )
