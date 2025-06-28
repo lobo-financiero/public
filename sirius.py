@@ -51,18 +51,18 @@ tickers_model_b_live = ["CPB", "ENPH", "LULU", "WBA", "FICO", "MRNA", "MGM", "CZ
 
 # --- Model C1 (New 1-year Model) ---
 tickers_model_c1_report = [
-    "CPB", "NVDA", "DE", "MRNA", "VTRS", "CZR", "MGM", "ENPH", "SMCI", "MCHP", "PARA",
-    "META", "INCY", "WBA", "NCLH", "INTC", "ADSK", "MOS", "KKR", "TSLA", "DECK", "FICO",
-    "GNRC", "PLTR", "ARE", "SWKS", "IVZ", "GDDY", "GEV", "JBL", "BG", "FSLR", "WBD",
-    "CCL", "CRWD", "CINF", "CRL", "TEL", "IPG", "PLD", "AZO", "CEG", "BBY", "ALB", "F",
-    "EXPE", "MPC", "ON", "DELL", "LYB"
+    "CPB", "NVDA", "DE", "MRNA", "VTRS", "CZR", "MGM", "ENPH", "SMCI", "MCHP",
+    "PARA", "META", "INCY", "WBA", "NCLH", "INTC", "ADSK", "MOS", "KKR", "TSLA",
+    "DECK", "FICO", "GNRC", "PLTR", "ARE", "SWKS", "IVZ", "GDDY", "GEV", "JBL",
+    "BG", "FSLR", "WBD", "CRWD", "CINF", "CRL", "TEL", "IPG", "PLD", "AZO",
+    "CEG", "BBY", "ALB", "F", "EXPE", "MPC", "ON", "DELL", "MU", "LYB"
 ]
 tickers_model_c1_live = [
-    "CPB", "NVDA", "DE", "ENPH", "MRNA", "LULU", "VTRS", "CZR", "FICO", "CAG", "TPL",
-    "MGM", "ARE", "ERIE", "PARA", "BBY", "PAYC", "ADSK", "UNH", "WBA", "DPZ", "IPG",
-    "PCG", "DECK", "CNC", "GDDY", "AZO", "DOW", "IT", "EIX", "HUM", "INCY", "EPAM",
-    "KMX", "CCI", "STZ", "LYB", "CCL", "PODD", "PLD", "TAP", "VRTX", "ADBE", "WSM",
-    "LW", "MOH", "HPQ", "GEN", "WDAY", "MAA"
+    "CPB", "NVDA", "ENPH", "DE", "MRNA", "LULU", "VTRS", "CZR", "FICO", "ARE",
+    "MGM", "PARA", "ADSK", "IPG", "TPL", "BBY", "DECK", "EPAM", "CAG", "UNH",
+    "NCLH", "ERIE", "WBA", "DPZ", "GDDY", "KKR", "PAYC", "PCG", "AZO", "TMUS",
+    "PODD", "EIX", "IT", "INTC", "KMX", "CNC", "DVA", "CCI", "INCY", "STZ",
+    "HUM", "WSM", "JBL", "HPQ", "F", "LYB", "AVGO", "ALB", "PLD", "UBER"
 ]
 
 # --- Model C3 (Renamed 3-year Backtested Model) ---
