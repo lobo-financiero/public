@@ -241,7 +241,7 @@ if spy_prices is not None and not spy_prices.empty:
 fig_line = go.Figure()
 
 # --- Define the robust color and style scheme ---
-color_map = {'A': 'royalblue', 'B': 'mediumseagreen', 'C1': 'gold', 'C3': 'crimson', 'Vega': 'darkviolet', 'SPY': 'orange'}
+color_map = {'A': 'royalblue', 'B': 'mediumseagreen', 'C1': 'gold', 'C3': 'crimson', 'Vega': 'darkviolet', 'SPY': 'white'}
 style_map = {
     'full_report':   {'dash': 'dash', 'width': 3},
     'full_live':     {'dash': 'solid', 'width': 3},
