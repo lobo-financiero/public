@@ -241,7 +241,8 @@ with filter_cols[1]:
     selected_types = st.multiselect(
         "Select Portfolio Type(s)",
         options=all_types,
-        default=["Live Top 50", "Report Top 50"] # Default to the main portfolios
+        # default=["Live Top 50", "Report Top 50"] # Default to the main portfolios
+        default=all_types
     )
 with filter_cols[2]:
     st.write("") # for vertical alignment
